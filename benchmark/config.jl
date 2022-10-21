@@ -10,18 +10,16 @@ const DECODE = ARGS[6] == "true"
 addprocs(parse(Int,NP),exeflags="--project=.")
 Pkg.instantiate()
 
-if SOLVER == "master"
-    Pkg.add(PackageSpec(name="MadNLP",rev="master"))
-    Pkg.add(PackageSpec(name="MadNLPHSL",rev="master"))
-    Pkg.build("MadNLPHSL")
-elseif SOLVER == "current"
+if SOLVER == "current"
     Pkg.develop(path=joinpath(@__DIR__,".."))
     Pkg.develop(path=joinpath(@__DIR__,"..","lib","MadNLPHSL"))
     Pkg.build("MadNLPHSL")
 elseif SOLVER == "ipopt"
 elseif SOLVER == "knitro"
 else
-    error("Proper ARGS should be given")
+    Pkg.add(PackageSpec(name="MadNLP",rev=SOLVER))
+    Pkg.add(PackageSpec(name="MadNLPHSL"))
+    Pkg.build("MadNLPHSL")
 end
 
 # Set verbose option

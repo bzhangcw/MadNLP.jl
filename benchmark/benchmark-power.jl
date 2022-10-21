@@ -36,21 +36,7 @@ include("config.jl")
     get_name(pm) = "$(pm.data["name"])-$(typeof(pm))"
 end
 
-if SOLVER == "master" || SOLVER == "current"
-    @everywhere begin
-        using MadNLP, MadNLPHSL
-        solver = pm -> begin
-            set_optimizer(pm.model,()->
-                MadNLP.Optimizer(linear_solver=MadNLPMa57,max_wall_time=900.,tol=1e-6, print_level=PRINT_LEVEL))
-            mem=@allocated begin
-                t=@elapsed begin
-                    optimize_model!(pm)
-                end
-            end
-            return get_status(termination_status(pm.model)),t,mem,barrier_iterations(pm.model)
-        end
-    end
-elseif SOLVER == "ipopt"
+if SOLVER == "ipopt"
     @everywhere begin
         using Ipopt
         
@@ -67,7 +53,7 @@ elseif SOLVER == "ipopt"
         solver = pm -> begin
             ITER[] = 0
             set_optimizer(pm.model,()->
-                Ipopt.Optimizer(linear_solver="ma57",max_cpu_time=900.,tol=1e-6, print_level=PRINT_LEVEL))
+                Ipopt.Optimizer(linear_solver="ma27",max_cpu_time=900.,tol=1e-6, print_level=PRINT_LEVEL))
             MOI.set(pm.model, Ipopt.CallbackFunction(), ipopt_callback)
             mem=@allocated begin
                 t=@elapsed begin
@@ -80,7 +66,27 @@ elseif SOLVER == "ipopt"
 elseif SOLVER == "knitro"
     # TODO
 else
-    error("Proper SOLVER should be given")
+    @everywhere begin
+        using MadNLP, MadNLPHSL
+        solver = pm -> begin
+            set_optimizer(
+                pm.model,
+                ()->
+                    MadNLP.Optimizer(
+                        linear_solver=@isdefined(Ma27Solver) ? Ma27Solver : MadNLPMa27,
+                        max_wall_time=900.,
+                        tol=1e-6,
+                        print_level=PRINT_LEVEL
+                    )
+            )
+            mem=@allocated begin
+                t=@elapsed begin
+                    optimize_model!(pm)
+                end
+            end
+            return get_status(termination_status(pm.model)),t,mem,barrier_iterations(pm.model)
+        end
+    end
 end
 
 

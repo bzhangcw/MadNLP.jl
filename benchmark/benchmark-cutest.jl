@@ -1,25 +1,10 @@
 include("config.jl")
-Pkg.add(PackageSpec(name="CUTEst",rev="main")) # will be removed once the new CUTEst version is released
 
 @everywhere using CUTEst
 
-if SOLVER == "master" || SOLVER == "current"
+if SOLVER == "ipopt"
     @everywhere begin
-        using MadNLP, MadNLPHSL
-        solver = nlp -> madnlp(nlp,linear_solver=MadNLPMa57,max_wall_time=900., print_level=PRINT_LEVEL)
-        function get_status(code::MadNLP.Status)
-            if code == MadNLP.SOLVE_SUCCEEDED
-                return 1
-            elseif code == MadNLP.SOLVED_TO_ACCEPTABLE_LEVEL
-                return 2
-            else
-                return 3
-            end
-        end
-    end
-elseif SOLVER == "ipopt"
-    @everywhere begin
-        solver = nlp -> ipopt(nlp,linear_solver="ma57",max_cpu_time=900., print_level=PRINT_LEVEL)
+        solver = nlp -> ipopt(nlp,linear_solver="ma27",max_cpu_time=900., print_level=PRINT_LEVEL)
         using NLPModelsIpopt
         function get_status(code::Symbol)
             if code == :first_order
@@ -34,7 +19,24 @@ elseif SOLVER == "ipopt"
 elseif SOLVER == "knitro"
     # TODO
 else
-    error("Proper SOLVER should be given")
+    @everywhere begin
+        using MadNLP, MadNLPHSL
+        solver = nlp -> madnlp(
+            nlp,
+            linear_solver= @isdefined(Ma27Solver) ? Ma27Solver : MadNLPMa27,
+            max_wall_time=900.,
+            print_level=PRINT_LEVEL
+        )
+        function get_status(code::MadNLP.Status)
+            if code == MadNLP.SOLVE_SUCCEEDED
+                return 1
+            elseif code == MadNLP.SOLVED_TO_ACCEPTABLE_LEVEL
+                return 2
+            else
+                return 3
+            end
+        end
+    end
 end
 
 

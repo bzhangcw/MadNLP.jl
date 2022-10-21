@@ -1,14 +1,19 @@
 using Plots, DelimitedFiles
 
 const CLASSES = filter(e-> e in ["cutest","power"], ARGS)
-const SOLVERS = filter(e-> e in ["current","master","ipopt","knitro"], ARGS)
+const SOLVERS = setdiff(ARGS, CLASSES)
 
-const LABELS = Dict(
-    "current" => "MadNLP (dev)",
-    "master" => "MadNLP (master)",
-    "ipopt" => "Ipopt",
-    "knitro" => "Knitro",
-)
+function getlabel(str)
+    if str == "ipopt"
+        return "Ipopt"
+    elseif str == "knitro"
+        return "Knitro"
+    elseif str == "current"
+        return "MadNLP (dev)"
+    else
+        return "MadNLP ($str)"
+    end    
+end
 
 for class in CLASSES
     
@@ -77,7 +82,7 @@ for class in CLASSES
             plot!(p,sort(relmetric[solver]),y;
                   qqline=:none,
                   linetype=:steppost,
-                  label=LABELS[solver])
+                  label=getlabel(solver))
         end
         savefig(p,"$str-$class.pdf")
     end

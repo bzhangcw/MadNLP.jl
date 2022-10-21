@@ -35,7 +35,7 @@ function parse_commandline()
             help = "testsets for benchmark (separated by comma). possible values: cutest, power"
             required = true
         "solvers"
-            help = "solvers to benchmark (separated by comma). possible values: current, master, ipopt"
+            help = "solvers to benchmark (separated by comma). possible values: current, master, v0.4.1, ipopt"
             required = true
     end
 
@@ -50,7 +50,6 @@ function main()
 
     # sanity check
     issubset(CLASSES,["cutest","power"]) || error("argument testsets is incorrect")
-    issubset(SOLVERS,["current","master","ipopt","knitro"]) || error("argument solvers is incorrect")
 
     PROJECT_PATH = dirname(@__FILE__)
     
@@ -58,7 +57,7 @@ function main()
         joinpath(PROJECT_PATH, ".Project.toml"),
         joinpath(PROJECT_PATH, "Project.toml"),
         force=true
-    )
+    )    
 
     for class in CLASSES
         for solver in SOLVERS
