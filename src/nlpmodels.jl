@@ -174,12 +174,11 @@ struct SparseCallback{
     T,
     VT <: AbstractVector{T},
     VI <: AbstractVector{Int},
-    I <: AbstractNLPModel{T, VT},
     FH <: AbstractFixedVariableTreatment,
     EH <: AbstractEqualityTreatment,
     } <: AbstractCallback{T, VT}
 
-    nlp::I
+    nlp::AbstractNLPModel{T, VT}
     nvar::Int
     ncon::Int
     nnzj::Int
@@ -213,12 +212,11 @@ struct DenseCallback{
     T,
     VT <: AbstractVector{T},
     MT <: AbstractMatrix{T},
-    I <: AbstractNLPModel{T, VT},
     FH <: AbstractFixedVariableTreatment,
     EH <: AbstractEqualityTreatment,
     } <: AbstractCallback{T, VT}
 
-    nlp::I
+    nlp::AbstractNLPModel{T, VT}
     nvar::Int
     ncon::Int
 
@@ -263,7 +261,7 @@ end
 
 function create_dense_fixed_handler(
     fixed_variable_treatment::Type{MakeParameter},
-    nlp,
+    nlp::AbstractNLPModel,
 )
     lvar = get_lvar(nlp)
     uvar = get_uvar(nlp)
@@ -279,7 +277,7 @@ end
 
 function create_sparse_fixed_handler(
     fixed_variable_treatment::Type{MakeParameter},
-    nlp,
+    nlp::AbstractNLPModel,
     jac_I,
     jac_J,
     hess_I,
@@ -317,7 +315,7 @@ end
 
 function create_sparse_fixed_handler(
     fixed_variable_treatment::Type{RelaxBound},
-    nlp,
+    nlp::AbstractNLPModel,
     jac_I,
     jac_J,
     hess_I,

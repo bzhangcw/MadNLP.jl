@@ -34,4 +34,14 @@ include("options.jl")
 include(joinpath("IPM", "IPM.jl"))
 include(joinpath("Interfaces","interfaces.jl"))
 
+import PrecompileTools
+
+PrecompileTools.@setup_workload begin
+    PrecompileTools.@compile_workload begin
+        let
+            include("precompile.jl")
+        end
+    end
+end
+
 end # end module

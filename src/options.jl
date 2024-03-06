@@ -170,7 +170,7 @@ function _get_primary_options(options)
     return primary_opt, remaining_opt
 end
 
-function load_options(nlp; options...)
+function load_options(nlp::AbstractNLPModel; options...)
     
     primary_opt, options = _get_primary_options(options)
     

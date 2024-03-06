@@ -11,14 +11,13 @@ mutable struct MadNLPSolver{
     VT <: AbstractVector{T},
     VI <: AbstractVector{Int},
     KKTSystem <: AbstractKKTSystem{T},
-    Model <: AbstractNLPModel{T,VT},
     CB <: AbstractCallback{T},
     Iterator <: AbstractIterator{T},
     IC <: AbstractInertiaCorrector,
     KKTVec <: AbstractKKTVector{T, VT}
     } <: AbstractMadNLPSolver{T}
 
-    nlp::Model
+    nlp::AbstractNLPModel{T,VT}
     cb::CB
     kkt::KKTSystem
 
