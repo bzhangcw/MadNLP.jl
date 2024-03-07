@@ -1,10 +1,12 @@
+import PrecompileTools
+
 PrecompileTools.@setup_workload begin
     struct HS15Model{T,VT} <: NLPModels.AbstractNLPModel{T,VT}
         meta::NLPModels.NLPModelMeta{T, VT}
         counters::NLPModels.Counters
     end
 
-    function HS15Model(T = Float64; x0=CUDA.zeros(2), y0=CUDA.zeros(2))
+    function HS15Model(T = Float64; x0=CUDA.zeros(Float64,2), y0=CUDA.zeros(Float64,2))
         return HS15Model(
             NLPModels.NLPModelMeta(
                 2,     #nvar
@@ -102,9 +104,9 @@ PrecompileTools.@setup_workload begin
     
     PrecompileTools.@compile_workload begin
         
-        s = MadNLPSolver(m; print_level = ERROR)
-        madnlp(m)
-        restore!(s)
-        robust!(s)
+        s = MadNLP.MadNLPSolver(m; print_level = MadNLP.ERROR)
+        MadNLP.madnlp(m)
+        MadNLP.restore!(s)
+        MadNLP.robust!(s)
     end
 end
