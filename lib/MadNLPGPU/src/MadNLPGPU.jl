@@ -55,6 +55,8 @@ function MadNLP.MadNLPOptions(
     )
 end
 
+include("precompile.jl")
+
 export LapackGPUSolver
 
 end # module
