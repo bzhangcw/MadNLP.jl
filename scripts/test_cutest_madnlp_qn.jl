@@ -7,14 +7,17 @@ ENV["MADNLP_PARDISO_LIBRARY_PATH"] = "/home/chuwen/panua-pardiso-20240229-linux/
 
 # file path 
 fname = ARGS[1]
-@info "" "file path" fname
 solvername = ARGS[2]
+alias = ARGS[3]
+solver = nothing
 if solvername == "pardiso"
     solver = MadNLPPardiso.PardisoSolver
-elseif solvername == "hsl"
+elseif solvername == "ma57"
     solver = MadNLPHSL.Ma57Solver
 end
+@info "" "file path" fname
 @info "" "using solver" solver
+@info "" "method name" "$alias"
 
 
 # warm_up_probs
@@ -38,7 +41,8 @@ header = [
     :nnzj
 ]
 compute = Dict(
-    :neq => (meta) -> length(meta.jfix)
+    :neq => (meta) -> length(meta.jfix),
+    :method => (meta) -> alias
 )
 attrs = [
     # bounds_multipliers_reliable  
@@ -74,10 +78,10 @@ getmadnlpkey(stats, attr) = begin
         if hasproperty(cc, attr)
             getfield(cc, attr)
         else
-            0.0
+            -1.0
         end
     else 
-        0.0
+        -1.0
     end
 end
 
@@ -96,6 +100,8 @@ for ℓ in eachrow(df)
             max_wall_time=900.0, 
             max_iter=1000, 
             print_level=MadNLP.INFO, 
+            kkt_system = MadNLP.SparseCondensedKKTSystem,
+            hessian_approximation=MadNLP.CompactLBFGS,
             tol=1e-6
         )
         _header=[
@@ -114,6 +120,7 @@ for ℓ in eachrow(df)
         flush(csvfile)
         finalize(problem)
     catch e
+        @error(e)
         finalize(problem)
     finally
     end
